@@ -13,7 +13,7 @@ const Navbar = () => {
     const userId = localStorage.getItem("userId");
 
     if (isLoggedIn && userId) {
-      axios.get(`http://localhost:8080/api/user/${userId}`)
+      axios.get(`https://backendspring-videostreaming.onrender.com/api/user/${userId}`)
         .then((res) => {
           setUser(res.data);
         })
