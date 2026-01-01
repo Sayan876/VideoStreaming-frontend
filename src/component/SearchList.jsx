@@ -20,7 +20,7 @@ const SearchList = () => {
 
         const userPromises = videosData.map((vid) =>
           axios
-            .get(`http://localhost:8080/api/v4/videos/getUserByVideo/${vid.videoId}`)
+            .get(`https://backendspring-videostreaming.onrender.com/api/v4/videos/getUserByVideo/${vid.videoId}`)
             .then((res) => ({ videoId: vid.videoId, user: res.data }))
             .catch(() => ({ videoId: vid.videoId, user: null }))
         );
