@@ -10,14 +10,14 @@ const PublicProfile = () => {
 
   // Fetch user data
   useEffect(() => {
-    axios.get(`http://localhost:8080/api/user/${abc}`)
+    axios.get(`https://backendspring-videostreaming.onrender.com/api/user/${abc}`)
       .then(resp => setUser(resp.data))
       .catch(err => console.log(err));
   }, [abc]);
 
   // Fetch videos
   useEffect(() => {
-    axios.get(`http://localhost:8080/api/v4/videos/byUserId/${abc}`)
+    axios.get(`https://backendspring-videostreaming.onrender.com/api/v4/videos/byUserId/${abc}`)
       .then(resp => setVids(resp.data))
       .catch(err => console.log(err));
   }, [abc]);
