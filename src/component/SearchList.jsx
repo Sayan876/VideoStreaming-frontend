@@ -13,7 +13,7 @@ const SearchList = () => {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:8080/api/v4/videos/searchByTitle/${obj.xyz}`)
+      .get(`https://backendspring-videostreaming.onrender.com/api/v4/videos/searchByTitle/${obj.xyz}`)
       .then(async (resp) => {
         const videosData = resp.data;
         setVideos(videosData);
