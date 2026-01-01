@@ -66,7 +66,7 @@ return { videoId: vid.videoId, userId, userName, profilePicUrl };
 
   return (
     <div className={style.pageContainer}>
-      <h1 className={style.header}>🎬 Explore Latest Videos</h1>
+      <h1 className={style.header}>🎬 Explore Latest Videosss</h1>
       <div className={style.videoGrid}>
         {videos.map((vid, index) => (
           <div key={vid.videoId} className={style.videoCard}>
