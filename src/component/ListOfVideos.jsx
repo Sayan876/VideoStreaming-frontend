@@ -12,18 +12,18 @@ const ListOfVideos = () => {
   useEffect(() => {
     const fetchVideosAndUsers = async () => {
       try {
-        const videoResponse = await axios.get("http://localhost:8080/api/v4/videos");
+        const videoResponse = await axios.get("https://backendspring-videostreaming.onrender.com/api/v4/videos");
         const videoList = videoResponse.data;
         setVideos(videoList);
 
         const userDataPromises = videoList.map(async (vid) => {
           try {
             const userIdResp = await axios.get(
-              `http://localhost:8080/api/v4/videos/getUserIdByVideoId/${vid.videoId}`
+              `https://backendspring-videostreaming.onrender.com/api/v4/videos/getUserIdByVideoId/${vid.videoId}`
             );
             const userId = userIdResp.data;
 
-            const userResp = await axios.get(`http://localhost:8080/api/user/${userId}`);
+            const userResp = await axios.get(`https://backendspring-videostreaming.onrender.com/api/user/${userId}`);
 
 const userName = userResp.data.name || "Unknown User";
 const profilePicUrl = userResp.data.profilePicUrl || "";
