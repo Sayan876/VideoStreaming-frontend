@@ -55,7 +55,7 @@ const SignUp = () => {
     // data.append("profilePic", profilePic);
 
     try {
-      await axios.post("http://localhost:8080/api/user", data, {
+      await axios.post("https://backendspring-videostreaming.onrender.com/api/user", data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       setMessage("Account has been created successfully, you can login now!");
