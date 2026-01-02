@@ -82,8 +82,11 @@ const PublicProfile = () => {
   );
 };
 
+
+
 // ---------- Styles ----------
 /* ===== Page Layout ===== */
+const styles ={
 .page {
   min-height: 100vh;
   background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
