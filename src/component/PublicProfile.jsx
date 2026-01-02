@@ -50,7 +50,7 @@ const PublicProfile = () => {
 
   <h2 style={styles.userName}>{user.name}</h2>
   <p style={styles.userEmail}>{user.email}</p>
-  <p style={styles.userCountry}>{user.country}</p>
+  <p style={styles.userCountry}>🌐 {user.country}</p>
   <p style={styles.userBio}>{user.biodetails}</p>
   <p style={styles.userSince}>
     Member since: {user.accountCreatedAt ? new Date(user.accountCreatedAt).toLocaleDateString() : "-"}
