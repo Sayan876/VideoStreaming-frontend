@@ -1,9 +1,13 @@
 import axios from "axios";
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import styles from "./UserDetails.module.css"; // 👈 Import the CSS module
+import styles from "./UserDetails.module.css"; //  Import the CSS module
 
 const UserDetails = () => {
+
+  const [profileUploading, setProfileUploading] = useState(false);
+  const [profileUploadProgress, setProfileUploadProgress] = useState(0);
+
   const [uploadProgress, setUploadProgress] = useState(0);
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -14,12 +18,9 @@ const UserDetails = () => {
   const [showProfileEdit, setShowProfileEdit] = useState(false);
   const [profileEditData, setProfileEditData] = useState({
     name: "",
-    password: "",
-    confirmPassword: "",
     country: "",
     biodetails: "",
   });
-  const [passwordError, setPasswordError] = useState("");
   const [uploadData, setUploadData] = useState({
     title: "",
     description: "",
@@ -27,6 +28,12 @@ const UserDetails = () => {
   });
   const [uploading, setUploading] = useState(false);
   const videoRefs = useRef([]);
+
+  // ---------------- Password Modal ----------------
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordErrorModal, setPasswordErrorModal] = useState("");
 
   // ---------------- Fetch User ----------------
   useEffect(() => {
@@ -92,7 +99,7 @@ const UserDetails = () => {
       formData.append("title", editData.title.trim());
       formData.append("description", editData.description.trim());
 
-      await axios.patch(`https://backendspring-videostreaming.onrender.com/api/v4/videos/${videoId}`, formData, {
+      await axios.patch(`https://backendspring-videostreaming.onrender.com//api/v4/videos/${videoId}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
@@ -117,24 +124,41 @@ const UserDetails = () => {
   const handleFileChange = (e) => setProfileFile(e.target.files[0]);
 
   const uploadProfilePic = async () => {
-    if (!profileFile) return;
-    try {
-      const formData = new FormData();
-      formData.append("profilePic", profileFile);
+  if (!profileFile) return;
 
-      const userId = localStorage.getItem("userId");
-      await axios.patch(`https://backendspring-videostreaming.onrender.com/api/user/${userId}/profile-pic`, formData, {
+  try {
+    setProfileUploading(true);
+    setProfileUploadProgress(0);
+
+    const formData = new FormData();
+    formData.append("profilePic", profileFile);
+
+    const userId = localStorage.getItem("userId");
+
+    await axios.patch(
+      `https://backendspring-videostreaming.onrender.com/api/user/${userId}/profile-pic`,
+      formData,
+      {
         headers: { "Content-Type": "multipart/form-data" },
-      });
+        onUploadProgress: (e) => {
+          const percent = Math.round((e.loaded * 100) / e.total);
+          setProfileUploadProgress(percent);
+        },
+      }
+    );
 
-      const resp = await axios.get(`https://backendspring-videostreaming.onrender.com/api/user/${userId}`);
-      setUser(resp.data);
-      setProfileFile(null);
-      alert("Profile picture updated!");
-    } catch (err) {
-      console.log("Error uploading profile picture", err);
-    }
-  };
+    const resp = await axios.get(`https://backendspring-videostreaming.onrender.com/api/user/${userId}`);
+    setUser(resp.data);
+    setProfileFile(null);
+  } catch (err) {
+    console.error("Error uploading profile picture", err);
+    alert("Failed to upload profile picture");
+  } finally {
+    setProfileUploading(false);
+    setProfileUploadProgress(0);
+  }
+};
+
 
   const deleteProfilePic = async () => {
     if (!window.confirm("Are you sure you want to delete your profile picture?")) return;
@@ -153,38 +177,19 @@ const UserDetails = () => {
   const openProfileEdit = () => {
     setProfileEditData({
       name: user.name || "",
-      password: user.password ||"",
-      confirmPassword: user.password || "",
       country: user.country || "",
       biodetails: user.biodetails || "",
     });
-    setPasswordError("");
     setShowProfileEdit(true);
   };
 
   const closeProfileEdit = () => setShowProfileEdit(false);
 
-  // live password check
-  useEffect(() => {
-    if (profileEditData.password && profileEditData.confirmPassword) {
-      if (profileEditData.password !== profileEditData.confirmPassword) {
-        setPasswordError("⚠️ Passwords do not match!");
-      } else {
-        setPasswordError("");
-      }
-    } else {
-      setPasswordError("");
-    }
-  }, [profileEditData.password, profileEditData.confirmPassword]);
-
   const saveProfileChanges = async () => {
-    if (passwordError) return;
-
     try {
       const userId = localStorage.getItem("userId");
       const formData = new FormData();
       formData.append("name", profileEditData.name);
-      formData.append("password", profileEditData.password);
       formData.append("country", profileEditData.country);
       formData.append("biodetails", profileEditData.biodetails);
 
@@ -256,6 +261,48 @@ const UserDetails = () => {
     }
   };
 
+  // ---------------- Password Modal Handlers ----------------
+  const openPasswordModal = () => {
+    setNewPassword("");
+    setConfirmPassword("");
+    setPasswordErrorModal("");
+    setShowPasswordModal(true);
+  };
+
+  const closePasswordModal = () => setShowPasswordModal(false);
+
+  useEffect(() => {
+    if (newPassword && confirmPassword) {
+      if (newPassword !== confirmPassword) {
+        setPasswordErrorModal("⚠️ Passwords do not match!");
+      } else {
+        setPasswordErrorModal("");
+      }
+    } else {
+      setPasswordErrorModal("");
+    }
+  }, [newPassword, confirmPassword]);
+
+  const saveNewPassword = async () => {
+    if (passwordErrorModal) return;
+    if (!newPassword) {
+      alert("Please enter a new password.");
+      return;
+    }
+
+    try {
+      const userId = localStorage.getItem("userId");
+      await axios.patch(
+        `https://backendspring-videostreaming.onrender.com/api/user/${userId}/updatePassword?password=${newPassword}`
+      );
+      alert("Password updated successfully!");
+      setShowPasswordModal(false);
+    } catch (err) {
+      console.error("Error updating password:", err);
+      alert("Failed to update password. Try again later.");
+    }
+  };
+
   if (!user) return <p style={{ color: "white" }}>Loading user...</p>;
 
   // ---------------- Render ----------------
@@ -264,29 +311,64 @@ const UserDetails = () => {
       {/* ---------- Profile Card ---------- */}
       <div className={styles.profileCard}>
         <div className={styles.imageContainer}>
-  {user.profilePicUrl ? (
-    <img
-      src={`${user.profilePicUrl}?t=${Date.now()}`}
-      alt="User Profile"
-      className={styles.profileImage}
-    />
-  ) : (
-    <div
-      className={styles.profileImage}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontSize: "4rem",
-        fontWeight: "bold",
-        color: "#1e1e1e",
-        background: "linear-gradient(135deg, #f39c12, #f1c40f)",
-        textTransform: "uppercase"
-      }}
-    >
-      {user.name?.charAt(0)}
-    </div>
-  )}
+  <div className={styles.profileWrapper}>
+
+    {user.profilePicUrl ? (
+      <img
+        src={`${user.profilePicUrl}?t=${Date.now()}`}
+        alt="User Profile"
+        className={styles.profileImage}
+      />
+    ) : (
+      <div
+        className={styles.profileImage}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: "4rem",
+          fontWeight: "bold",
+          color: "#1e1e1e",
+          background: "linear-gradient(135deg, #f39c12, #f1c40f)",
+          textTransform: "uppercase",
+        }}
+      >
+        {user.name?.charAt(0)}
+      </div>
+    )}
+
+    {profileUploading && (
+      <>
+        <svg
+  className={styles.progressRing}
+  viewBox="0 0 100 100"
+  preserveAspectRatio="xMidYMid meet"
+>
+  <circle
+    className={styles.progressBg}
+    cx="50"
+    cy="50"
+    r="45"
+  />
+  <circle
+    className={styles.progressFg}
+    cx="50"
+    cy="50"
+    r="45"
+    strokeDasharray={2 * Math.PI * 45}
+    strokeDashoffset={
+      2 * Math.PI * 45 * (1 - profileUploadProgress / 100)
+    }
+  />
+</svg>
+
+        <div className={styles.progressTextCenter}>
+          {profileUploadProgress}%
+        </div>
+      </>
+    )}
+
+  </div>
 </div>
 
 
@@ -308,13 +390,11 @@ const UserDetails = () => {
 
         <div style={{ display: "flex", justifyContent: "center", gap: "1rem" }}>
           <button onClick={openProfileEdit} className={styles.editBtn}>Edit Profile Details</button>
-          {/* <button onClick={handleLogout} className={styles.logoutBtn}>Logout</button> */}
+          <button onClick={openPasswordModal} className={styles.editBtn}>Change Password</button>
         </div>
 
         <div style={{ marginTop: "2rem", textAlign: "center" }}>
-          <button onClick={deleteAccount} className={styles.deleteAccountBtn}>
-            Delete Account
-          </button>
+          <button onClick={deleteAccount} className={styles.deleteAccountBtn}>Delete Account</button>
         </div>
       </div>
 
@@ -409,7 +489,7 @@ const UserDetails = () => {
       {showProfileEdit && (
         <div className={styles.modalOverlay}>
           <div className={styles.modal}>
-            <h2 style={{ color: "#f39c12", textAlign: "center" }}>Edit Profile</h2>
+            <h2 style={{ color: "#ff0000ff", textAlign: "center" }}>Edit Profile</h2>
 
             <input
               type="text"
@@ -418,66 +498,47 @@ const UserDetails = () => {
               onChange={(e) => setProfileEditData({ ...profileEditData, name: e.target.value })}
               className={styles.input}
             />
-            <input
-              type="password"
-              placeholder="New Password"
-              value={profileEditData.password}
-              onChange={(e) => setProfileEditData({ ...profileEditData, password: e.target.value })}
-              className={styles.input}
-              required
-            />
-            <input
-              type="password"
-              placeholder="Confirm Password"
-              value={profileEditData.confirmPassword}
-              onChange={(e) => setProfileEditData({ ...profileEditData, confirmPassword: e.target.value })}
-              className={styles.input}
-              required
-            />
-            {passwordError && <p style={{ color: "red", fontSize: "0.9rem" }}>{passwordError}</p>}
 
             <select
-  value={profileEditData.country}
-  onChange={(e) =>
-    setProfileEditData({ ...profileEditData, country: e.target.value })
-  }
-  className={styles.select}
->
-  <option value="">Select your country</option>
-  {[
-    "Afghanistan","Albania","Algeria","Andorra","Angola","Antigua and Barbuda","Argentina",
-    "Armenia","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados",
-    "Belarus","Belgium","Belize","Benin","Bhutan","Bolivia","Bosnia and Herzegovina",
-    "Botswana","Brazil","Brunei","Bulgaria","Burkina Faso","Burundi","Cabo Verde","Cambodia",
-    "Cameroon","Canada","Central African Republic","Chad","Chile","China","Colombia","Comoros",
-    "Congo (Congo-Brazzaville)","Costa Rica","Croatia","Cuba","Cyprus","Czech Republic",
-    "Democratic Republic of the Congo","Denmark","Djibouti","Dominica","Dominican Republic",
-    "Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini",
-    "Ethiopia","Fiji","Finland","France","Gabon","Gambia","Georgia","Germany","Ghana","Greece",
-    "Grenada","Guatemala","Guinea","Guinea-Bissau","Guyana","Haiti","Honduras","Hungary",
-    "Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan",
-    "Jordan","Kazakhstan","Kenya","Kiribati","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon",
-    "Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Madagascar","Malawi",
-    "Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico",
-    "Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar",
-    "Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria",
-    "North Korea","North Macedonia","Norway","Oman","Pakistan","Palau","Palestine State",
-    "Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Qatar",
-    "Romania","Russia","Rwanda","Saint Kitts and Nevis","Saint Lucia",
-    "Saint Vincent and the Grenadines","Samoa","San Marino","Sao Tome and Principe",
-    "Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia",
-    "Slovenia","Solomon Islands","Somalia","South Africa","South Korea","South Sudan","Spain",
-    "Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syria","Taiwan","Tajikistan",
-    "Tanzania","Thailand","Timor-Leste","Togo","Tonga","Trinidad and Tobago","Tunisia",
-    "Turkey","Turkmenistan","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom",
-    "United States","Uruguay","Uzbekistan","Vanuatu","Vatican City","Venezuela","Vietnam",
-    "Yemen","Zambia","Zimbabwe"
-  ].map((country) => (
-    <option key={country} value={country}>
-      {country}
-    </option>
-  ))}
-</select>
+              value={profileEditData.country}
+              onChange={(e) =>
+                setProfileEditData({ ...profileEditData, country: e.target.value })
+              }
+              className={styles.select}
+            >
+              <option value="">Select your country</option>
+              {/* country options same as before */}
+              {[ "Afghanistan","Albania","Algeria","Andorra","Angola","Antigua and Barbuda","Argentina",
+                "Armenia","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados",
+                "Belarus","Belgium","Belize","Benin","Bhutan","Bolivia","Bosnia and Herzegovina",
+                "Botswana","Brazil","Brunei","Bulgaria","Burkina Faso","Burundi","Cabo Verde","Cambodia",
+                "Cameroon","Canada","Central African Republic","Chad","Chile","China","Colombia","Comoros",
+                "Congo (Congo-Brazzaville)","Costa Rica","Croatia","Cuba","Cyprus","Czech Republic",
+                "Democratic Republic of the Congo","Denmark","Djibouti","Dominica","Dominican Republic",
+                "Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini",
+                "Ethiopia","Fiji","Finland","France","Gabon","Gambia","Georgia","Germany","Ghana","Greece",
+                "Grenada","Guatemala","Guinea","Guinea-Bissau","Guyana","Haiti","Honduras","Hungary",
+                "Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan",
+                "Jordan","Kazakhstan","Kenya","Kiribati","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon",
+                "Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Madagascar","Malawi",
+                "Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico",
+                "Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar",
+                "Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria",
+                "North Korea","North Macedonia","Norway","Oman","Pakistan","Palau","Palestine State",
+                "Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Qatar",
+                "Romania","Russia","Rwanda","Saint Kitts and Nevis","Saint Lucia",
+                "Saint Vincent and the Grenadines","Samoa","San Marino","Sao Tome and Principe",
+                "Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia",
+                "Slovenia","Solomon Islands","Somalia","South Africa","South Korea","South Sudan","Spain",
+                "Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syria","Taiwan","Tajikistan",
+                "Tanzania","Thailand","Timor-Leste","Togo","Tonga","Trinidad and Tobago","Tunisia",
+                "Turkey","Turkmenistan","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom",
+                "United States","Uruguay","Uzbekistan","Vanuatu","Vatican City","Venezuela","Vietnam",
+                "Yemen","Zambia","Zimbabwe"
+              ].map((country) => (
+                <option key={country} value={country}>{country}</option>
+              ))}
+            </select>
 
             <textarea
               placeholder="Bio / About Me"
@@ -487,18 +548,50 @@ const UserDetails = () => {
             />
 
             <div className={styles.buttonGroup}>
+              <button onClick={saveProfileChanges} className={styles.saveBtn} disabled={!profileEditData.name}>
+                Save
+              </button>
+              <button onClick={closeProfileEdit} className={styles.cancelBtn}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ---------- Change Password Modal ---------- */}
+      {showPasswordModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modal}>
+            <h2 style={{ color: "#f39c12", textAlign: "center" }}>Change Password</h2>
+
+            <input
+              type="password"
+              placeholder="New Password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className={styles.input}
+            />
+            <input
+              type="password"
+              placeholder="Confirm New Password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className={styles.input}
+            />
+            {passwordErrorModal && <p style={{ color: "red", fontSize: "0.9rem" }}>{passwordErrorModal}</p>}
+
+            <div className={styles.buttonGroup}>
               <button
-                onClick={saveProfileChanges}
+                onClick={saveNewPassword}
                 className={styles.saveBtn}
-                disabled={passwordError !== "" || !profileEditData.name}
+                disabled={passwordErrorModal !== "" || !newPassword}
                 style={{
-                  opacity: passwordError !== "" ? 0.6 : 1,
-                  cursor: passwordError !== "" ? "not-allowed" : "pointer",
+                  opacity: passwordErrorModal !== "" ? 0.6 : 1,
+                  cursor: passwordErrorModal !== "" ? "not-allowed" : "pointer",
                 }}
               >
                 Save
               </button>
-              <button onClick={closeProfileEdit} className={styles.cancelBtn}>
+              <button onClick={closePasswordModal} className={styles.cancelBtn}>
                 Cancel
               </button>
             </div>
