@@ -400,7 +400,7 @@ const UserDetails = () => {
 
       {/* ---------- Upload New Video Section ---------- */}
       <div className={styles.uploadSection}>
-        <h2 className={styles.uploadHeading}>🎬 Upload Your New Video</h2>
+        <h2 className={styles.uploadHeading}>🎬 Upload Your New Video (<100 MB)</h2>
         <p className={styles.uploadSubText}>
           Share your creativity with the world! Fill in the details below and upload your masterpiece.
         </p>
@@ -441,7 +441,8 @@ const UserDetails = () => {
         {videos.map((vid, index) => (
           <div key={vid.videoId} className={styles.videoCard}>
             <video
-              width="100%"
+              width="100%" 
+              height="220px"
               controls
               ref={(el) => (videoRefs.current[index] = el)}
               onPlay={() => handlePlay(index)}
