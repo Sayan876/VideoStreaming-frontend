@@ -31,35 +31,96 @@
   margin-bottom: 1rem;
 }
 
+/* =========================
+   PROFILE IMAGE & WRAPPER
+========================= */
+.profileWrapper {
+  position: relative;
+  width: 120px;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .profileImage {
-  width: 130px;
-  height: 130px;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1 / 1;
   border-radius: 50%;
   object-fit: cover;
   border: 4px solid #f39c12;
   box-shadow: 0 0 20px rgba(243, 156, 18, 0.7);
 }
 
+/* =============================
+   PROFILE PICTURE PROGRESS RING
+============================= */
+.progressRing {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border:1px solid rgba(0, 0, 0, 0);
+  border-radius: 50%;
+  transform: rotate(-90deg);
+}
+
+.progressRing circle {
+  fill: none;
+  stroke-linecap: round;
+}
+
+.progressBg {
+  stroke: rgba(255, 255, 255, 0.15);
+  stroke-width: 4;
+}
+
+.progressFg {
+  stroke: #1295f3;
+  stroke-width: 4;
+  transition: stroke-dashoffset 0.3s ease;
+  filter: drop-shadow(0 0 8px rgba(0, 42, 255, 0.9));
+}
+
+.progressTextCenter {
+  position: absolute;
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: bold;
+  text-align: center;
+  pointer-events: none;
+}
+
 /* =========================
    FILE UPLOAD
 ========================= */
 .fileUploadContainer {
-  margin: 1rem 0;
+  
+  margin-top: 10px;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  align-items: center;
   gap: 0.5rem;
 }
 
 .chooseFileBtn,
 .uploadBtn,
 .deleteProfileBtn {
-  padding: 8px 16px;
+  padding: 0 16px;
+  height: 40px;
   border-radius: 8px;
   border: none;
-  font-weight: bold;
   cursor: pointer;
   color: white;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .chooseFileBtn {
@@ -97,16 +158,6 @@
   line-height: 1.6;
   color: #ccc;
   margin-bottom: 1.2rem;
-}
-
-.logoutBtn {
-  padding: 12px 25px;
-  border-radius: 10px;
-  border: none;
-  background: #e74c3c;
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
 }
 
 /* =========================
@@ -157,6 +208,7 @@
    BUTTON GROUP
 ========================= */
 .buttonGroup {
+  height: 50px;
   display: flex;
   gap: 0.5rem;
   margin-top: 0.6rem;
@@ -196,6 +248,7 @@
   color: #fff;
   padding: 10px;
   outline: none;
+  margin-bottom: 10px;
 }
 
 .textarea,
@@ -291,7 +344,7 @@
 }
 
 /* =========================
-   DESKTOP ENHANCEMENTS
+   RESPONSIVE
 ========================= */
 @media (min-width: 768px) {
   .page {
@@ -303,12 +356,31 @@
     padding: 3rem;
   }
 
-  .profileImage {
-    width: 150px;
-    height: 150px;
+  .profileWrapper {
+    width: 160px;
   }
 
   .name {
     font-size: 1.9rem;
+  }
+
+  .progressBg,
+  .progressFg {
+    stroke-width: 8;
+  }
+}
+
+@media (max-width: 360px) {
+  .profileWrapper {
+    width: 100px;
+  }
+
+  .progressBg,
+  .progressFg {
+    stroke-width: 5;
+  }
+
+  .progressTextCenter {
+    font-size: 0.75rem;
   }
 }
