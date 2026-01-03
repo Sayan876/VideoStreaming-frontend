@@ -99,7 +99,7 @@ const UserDetails = () => {
       formData.append("title", editData.title.trim());
       formData.append("description", editData.description.trim());
 
-      await axios.patch(`https://backendspring-videostreaming.onrender.com//api/v4/videos/${videoId}`, formData, {
+      await axios.patch(`https://backendspring-videostreaming.onrender.com/api/v4/videos/${videoId}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
