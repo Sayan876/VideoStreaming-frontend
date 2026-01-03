@@ -176,9 +176,6 @@
 ========================= */
 .videoCard {
   background: #222;
-  height: 220px;
-  object-fit: cover;
-  display: block;
   border-radius: 15px;
   padding: 1rem;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
