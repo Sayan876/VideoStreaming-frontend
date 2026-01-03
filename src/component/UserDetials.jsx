@@ -46,7 +46,7 @@ const UserDetails = () => {
     }
 
     axios
-      .get(`http://localhost:8080/api/user/${storedId}`)
+      .get(`https://backendspring-videostreaming.onrender.com/api/user/${storedId}`)
       .then((resp) => setUser(resp.data))
       .catch(() => {
         console.log("Cannot fetch user data");
@@ -58,7 +58,7 @@ const UserDetails = () => {
     if (!user?.id) return;
 
     axios
-      .get(`http://localhost:8080/api/v4/videos/byUserId/${user.id}`)
+      .get(`https://backendspring-videostreaming.onrender.com/api/v4/videos/byUserId/${user.id}`)
       .then((resp) => setVideos(resp.data))
       .catch(() => console.log("Cannot fetch videos"));
   };
@@ -99,7 +99,7 @@ const UserDetails = () => {
       formData.append("title", editData.title.trim());
       formData.append("description", editData.description.trim());
 
-      await axios.patch(`http://localhost:8080/api/v4/videos/${videoId}`, formData, {
+      await axios.patch(`https://backendspring-videostreaming.onrender.com/api/v4/videos/${videoId}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
@@ -113,7 +113,7 @@ const UserDetails = () => {
   const deleteVideo = async (videoId) => {
     if (!window.confirm("Are you sure you want to delete this video?")) return;
     try {
-      await axios.delete(`http://localhost:8080/api/v4/videos/${videoId}`);
+      await axios.delete(`https://backendspring-videostreaming.onrender.com/api/v4/videos/${videoId}`);
       fetchVideos();
     } catch (err) {
       console.log("Error deleting video", err);
@@ -136,7 +136,7 @@ const UserDetails = () => {
     const userId = localStorage.getItem("userId");
 
     await axios.patch(
-      `http://localhost:8080/api/user/${userId}/profile-pic`,
+      `https://backendspring-videostreaming.onrender.com/api/user/${userId}/profile-pic`,
       formData,
       {
         headers: { "Content-Type": "multipart/form-data" },
@@ -147,7 +147,7 @@ const UserDetails = () => {
       }
     );
 
-    const resp = await axios.get(`http://localhost:8080/api/user/${userId}`);
+    const resp = await axios.get(`https://backendspring-videostreaming.onrender.com/api/user/${userId}`);
     setUser(resp.data);
     setProfileFile(null);
   } catch (err) {
@@ -164,8 +164,8 @@ const UserDetails = () => {
     if (!window.confirm("Are you sure you want to delete your profile picture?")) return;
     try {
       const userId = localStorage.getItem("userId");
-      await axios.delete(`http://localhost:8080/api/user/${userId}/profile-pic`);
-      const resp = await axios.get(`http://localhost:8080/api/user/${userId}`);
+      await axios.delete(`https://backendspring-videostreaming.onrender.com/api/user/${userId}/profile-pic`);
+      const resp = await axios.get(`https://backendspring-videostreaming.onrender.com/api/user/${userId}`);
       setUser(resp.data);
       alert("Profile picture deleted!");
     } catch (err) {
@@ -193,11 +193,11 @@ const UserDetails = () => {
       formData.append("country", profileEditData.country);
       formData.append("biodetails", profileEditData.biodetails);
 
-      await axios.patch(`http://localhost:8080/api/user/${userId}/details`, formData, {
+      await axios.patch(`https://backendspring-videostreaming.onrender.com/api/user/${userId}/details`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      const resp = await axios.get(`http://localhost:8080/api/user/${userId}`);
+      const resp = await axios.get(`https://backendspring-videostreaming.onrender.com/api/user/${userId}`);
       setUser(resp.data);
       setShowProfileEdit(false);
       alert("Profile details updated successfully!");
@@ -224,7 +224,7 @@ const UserDetails = () => {
       formData.append("title", uploadData.title.trim());
       formData.append("description", uploadData.description.trim());
 
-      await axios.post(`http://localhost:8080/api/v4/videos/${user.id}`, formData, {
+      await axios.post(`https://backendspring-videostreaming.onrender.com/api/v4/videos/${user.id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
         onUploadProgress: (progressEvent) => {
           const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
@@ -250,7 +250,7 @@ const UserDetails = () => {
 
     try {
       const userId = localStorage.getItem("userId");
-      await axios.delete(`http://localhost:8080/api/user/${userId}`);
+      await axios.delete(`https://backendspring-videostreaming.onrender.com/api/user/${userId}`);
       alert("Your account has been deleted successfully.");
       localStorage.removeItem("isLoggedIn");
       localStorage.removeItem("userId");
@@ -293,7 +293,7 @@ const UserDetails = () => {
     try {
       const userId = localStorage.getItem("userId");
       await axios.patch(
-        `http://localhost:8080/api/user/${userId}/updatePassword?password=${newPassword}`
+        `https://backendspring-videostreaming.onrender.com/api/user/${userId}/updatePassword?password=${newPassword}`
       );
       alert("Password updated successfully!");
       setShowPasswordModal(false);
