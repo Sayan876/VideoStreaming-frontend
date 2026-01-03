@@ -442,7 +442,7 @@ const UserDetails = () => {
           <div key={vid.videoId} className={styles.videoCard}>
             <video
               width="100%" 
-              height="220px"
+              
               controls
               ref={(el) => (videoRefs.current[index] = el)}
               onPlay={() => handlePlay(index)}
