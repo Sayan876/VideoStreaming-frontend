@@ -172,7 +172,11 @@ const styles = {
   videoPlayer: {
     width: '100%',
     borderRadius: '12px',
-    marginBottom: '0.8rem'
+    marginBottom: '0.8rem',
+    objectFit:'cover', 
+    display:'block', 
+    height:'220px', 
+    width:'100%'
   },
 
   videoTitle: {
