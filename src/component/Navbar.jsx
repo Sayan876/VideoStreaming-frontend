@@ -6,6 +6,9 @@ import styles from "./navbar.module.css";
 const Navbar = () => {
   const [title, setTitle] = useState("");
   const [user, setUser] = useState(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
   const navigate = useNavigate();
 
   /* =========================
@@ -17,7 +20,7 @@ const Navbar = () => {
 
     if (isLoggedIn && userId) {
       axios
-        .get(`https://backendspring-videostreaming.onrender.com/api/user/${userId}`)
+        .get(`http://localhost:8080/api/user/${userId}`)
         .then((res) => setUser(res.data))
         .catch(() => {
           localStorage.clear();
@@ -33,6 +36,8 @@ const Navbar = () => {
     e.preventDefault();
     if (!title.trim()) return;
     navigate(`/SearchList/${title}`);
+    setTitle("");
+    setMenuOpen(false);
   };
 
   const handleLogout = () => {
@@ -46,12 +51,12 @@ const Navbar = () => {
   ========================= */
   return (
     <nav className={styles.navbar}>
-      {/* LEFT : LOGO */}
-      <div className={styles.leftSection}>
-        <h2 className={styles.logo}>MyStream</h2>
-      </div>
+      {/* LEFT */}
+      <Link to="/ListOfVideos" className={styles.logo}>
+        MyStream
+      </Link>
 
-      {/* CENTER : SEARCH */}
+      {/* SEARCH (DESKTOP ONLY) */}
       <form className={styles.searchContainer} onSubmit={handleSearch}>
         <input
           className={styles.searchBar}
@@ -63,16 +68,33 @@ const Navbar = () => {
         <button className={styles.searchButton}>Search</button>
       </form>
 
-      {/* RIGHT : NAV / USER */}
+      {/* RIGHT */}
       <div className={styles.rightSection}>
-        <Link to="/ListOfVideos" className={styles.navLink}>
-          Home
-        </Link>
+        {/* HAMBURGER */}
+        <button
+          className={styles.hamburger}
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          ☰
+        </button>
 
-        {user ? (
-          <div className={styles.userMenu}>
+        {/* MENU */}
+        <div className={`${styles.menu} ${menuOpen ? styles.open : ""}`}>
+          <Link to="/ListOfVideos" className={styles.navLink}>
+            Home
+          </Link>
+
+          {!user ? (
+            <>
+              <Link to="/Login" className={styles.navLink}>
+                Login
+              </Link>
+              <Link to="/SignUp" className={styles.signUpBtn}>
+                Sign Up
+              </Link>
+            </>
+          ) : (
             <div className={styles.profileArea}>
-              {/* PROFILE IMAGE / FALLBACK */}
               {user.profilePicUrl ? (
                 <img
                   src={user.profilePicUrl}
@@ -80,45 +102,29 @@ const Navbar = () => {
                   className={styles.profilePic}
                 />
               ) : (
-                <div
-                  className={styles.profilePic}
-                  style={{
-                    background: "#b91c1c",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "#fff",
-                    fontWeight: "bold",
-                  }}
-                >
+                <div className={styles.fallbackPic}>
                   {user.name?.charAt(0).toUpperCase()}
                 </div>
               )}
 
-              {/* USER NAME */}
               <span className={styles.username}>{user.name}</span>
 
-              {/* DROPDOWN */}
-              <div>
-                <button className={styles.dropdownBtn}>▼</button>
+              <button
+                className={styles.dropdownBtn}
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+              >
+                ▼
+              </button>
 
+              {dropdownOpen && (
                 <div className={styles.dropdownContent}>
                   <Link to={`/Userdetials/${user.id}`}>Profile</Link>
                   <button onClick={handleLogout}>Logout</button>
                 </div>
-              </div>
+              )}
             </div>
-          </div>
-        ) : (
-          <>
-            <Link to="/Login" className={styles.navLink}>
-              Login
-            </Link>
-            <Link to="/SignUp" className={styles.signUpBtn}>
-              Sign Up
-            </Link>
-          </>
-        )}
+          )}
+        </div>
       </div>
     </nav>
   );
