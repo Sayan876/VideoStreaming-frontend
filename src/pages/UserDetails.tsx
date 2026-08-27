@@ -9,7 +9,6 @@ import {
   Edit3,
   FileVideo,
   Lock,
-  Play,
   Save,
   ShieldCheck,
   Trash2,

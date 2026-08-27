@@ -6,8 +6,7 @@ import {
   Play,
   RefreshCw,
   Search,
-  UserRound,
-  Video as VideoIcon,
+  UserRound
 } from "lucide-react";
 
 /* ============================================================
